@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:goritmi_task/core/Models/task_model.dart';
@@ -6,6 +8,8 @@ import 'package:goritmi_task/core/enums/task_sorting.dart';
 import 'package:goritmi_task/core/services/db_services.dart';
 import 'package:goritmi_task/ui/widgets/custom_snackbars.dart';
 import 'package:intl/intl.dart';
+
+import 'notification_service.dart';
 
 class TaskProvider extends ChangeNotifier {
   final DBServices _dbHelper = DBServices();
@@ -20,8 +24,8 @@ class TaskProvider extends ChangeNotifier {
     fetchTasks();
   }
 
-  Future<void> addTask(
-      String title, String description, BuildContext context) async {
+  Future<void> addTask(String title, String description, BuildContext context,
+      DateTime? dueDateTime) async {
     showDialog(
       context: context,
       barrierDismissible: false,
@@ -44,9 +48,19 @@ class TaskProvider extends ChangeNotifier {
         description: description,
         done: 0,
         createDate: formattedDate,
+        dueDateTime: dateTimeToTimestamp(dueDateTime)!.toInt(),
       );
+      print('data before saving>>>>>${task.dueDateTime}');
+      selectedDueDate = null;
 
       await _dbHelper.insert(task);
+
+      await NotificationHelper.scheduleNotification(
+        title: 'Task Reminder',
+        body: 'Don\'t forget to complete "${task.title}"!',
+        scheduledTime: dueDateTime!,
+        id: generateRandomNotificationId(),
+      );
 
       Navigator.of(context).pop();
 
@@ -58,6 +72,11 @@ class TaskProvider extends ChangeNotifier {
       CustomSnackBar.showError('Error adding task: $e');
       rethrow;
     }
+  }
+
+  int generateRandomNotificationId() {
+    final random = Random();
+    return random.nextInt(900) + 100;
   }
 
   Future<void> deleteTask(int taskId) async {
@@ -80,6 +99,7 @@ class TaskProvider extends ChangeNotifier {
         description: task.description,
         done: 1,
         createDate: task.createDate,
+        dueDateTime: task.dueDateTime,
       );
 
       await _dbHelper.updateNote(updatedTask);
@@ -119,6 +139,16 @@ class TaskProvider extends ChangeNotifier {
       CustomSnackBar.showError('Error fetching tasks: $e');
       rethrow;
     }
+  }
+
+  int? dateTimeToTimestamp(DateTime? dateTime) {
+    return dateTime?.millisecondsSinceEpoch;
+  }
+
+  DateTime? timestampToDateTime(int? timestamp) {
+    return timestamp != null
+        ? DateTime.fromMillisecondsSinceEpoch(timestamp)
+        : null;
   }
 
   Future<void> selectDate(BuildContext context) async {

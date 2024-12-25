@@ -4,6 +4,7 @@ class TaskModel {
   final String description;
   final int done;
   final String createDate;
+  final int dueDateTime;
 
   TaskModel({
     this.id,
@@ -11,6 +12,7 @@ class TaskModel {
     required this.description,
     required this.done,
     required this.createDate,
+    required this.dueDateTime,
   });
 
   TaskModel.fromMap(Map<String, dynamic> res)
@@ -18,7 +20,8 @@ class TaskModel {
         title = res["title"],
         description = res["description"],
         done = res["done"],
-        createDate = res["createDate"];
+        createDate = res["createDate"],
+        dueDateTime = res["dueDateTime"];
 
   Map<String, Object?> toMap() {
     return {
@@ -27,6 +30,7 @@ class TaskModel {
       'description': description,
       'done': done,
       'createDate': createDate,
+      'dueDateTime': dueDateTime,
     };
   }
 }

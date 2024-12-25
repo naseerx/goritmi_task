@@ -1,14 +1,18 @@
+import 'dart:ui';
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:goritmi_task/core/enums/task_sorting.dart';
 import 'package:goritmi_task/core/enums/task_filter.dart';
 import 'package:goritmi_task/core/providers/task_provider.dart';
-import 'package:goritmi_task/ui/screens/task_screen/add_task_screen.dart';
 import 'package:goritmi_task/ui/widgets/custom_snackbars.dart';
 import 'package:goritmi_task/ui/widgets/task_block.dart';
 import 'package:provider/provider.dart';
 
 import '../../../core/constants/colors.dart';
+import 'package:permission_handler/permission_handler.dart';
+import 'add_task_screen.dart';
+import 'package:tutorial_coach_mark/tutorial_coach_mark.dart';
 
 class TasksScreen extends StatefulWidget {
   const TasksScreen({super.key});
@@ -18,6 +22,34 @@ class TasksScreen extends StatefulWidget {
 }
 
 class _TasksScreenState extends State<TasksScreen> {
+  final GlobalKey _filterDropdownKey = GlobalKey();
+  final GlobalKey _sortDropdownKey = GlobalKey();
+  final GlobalKey _taskListKey = GlobalKey();
+  final GlobalKey _addButtonKey = GlobalKey();
+
+  late TutorialCoachMark tutorialCoachMark;
+
+  Future<void> requestNotificationPermissions() async {
+    var status = await Permission.notification.request();
+
+    if (status.isGranted) {
+      print("Notification permission granted");
+    } else if (status.isDenied) {
+      print("Notification permission denied");
+    } else if (status.isPermanentlyDenied) {
+      openAppSettings();
+    }
+  }
+
+  @override
+  void initState() {
+    requestNotificationPermissions();
+    createTutorial();
+    Future.delayed(Duration.zero, showTutorial);
+
+    super.initState();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Consumer<TaskProvider>(builder: (context, taskProvider, child) {
@@ -58,6 +90,7 @@ class _TasksScreenState extends State<TasksScreen> {
               Row(
                 children: [
                   DropdownButton<TaskFilter>(
+                    key: _filterDropdownKey,
                     iconEnabledColor: kSecondaryColor,
                     value: taskProvider.currentFilter,
                     onChanged: (TaskFilter? newValue) {
@@ -83,6 +116,7 @@ class _TasksScreenState extends State<TasksScreen> {
                   ),
                   const Spacer(),
                   DropdownButton<TaskSortOption>(
+                    key: _sortDropdownKey,
                     value: taskProvider.currentOption,
                     iconEnabledColor: kSecondaryColor,
                     onChanged: (TaskSortOption? newValue) {
@@ -112,13 +146,15 @@ class _TasksScreenState extends State<TasksScreen> {
               ),
               Expanded(
                 child: taskProvider.tasks.isEmpty
-                    ? const Center(
+                    ? Center(
                         child: Text(
+                          key: _taskListKey,
                           'No tasks available. Add one!',
-                          style: TextStyle(fontSize: 18, color: kBlack),
+                          style: const TextStyle(fontSize: 18, color: kBlack),
                         ),
                       )
                     : ListView.builder(
+                        key: _taskListKey,
                         itemCount: taskProvider.tasks.length,
                         itemBuilder: (context, index) {
                           final task = taskProvider.tasks[index];
@@ -155,13 +191,176 @@ class _TasksScreenState extends State<TasksScreen> {
           ),
         ),
         floatingActionButton: FloatingActionButton(
+            key: _addButtonKey,
             backgroundColor: kPrimaryColor,
             foregroundColor: kSecondaryColor,
-            onPressed: () {
+            onPressed: () async {
               Get.to(() => const AddTaskScreen());
             },
             child: const Icon(Icons.add, size: 40)),
       );
     });
+  }
+
+  void showTutorial() {
+    tutorialCoachMark.show(context: context);
+  }
+
+  void createTutorial() {
+    tutorialCoachMark = TutorialCoachMark(
+      targets: _createTargets(),
+      colorShadow: Colors.red,
+      textSkip: "SKIP",
+      paddingFocus: 10,
+      opacityShadow: 0.5,
+      imageFilter: ImageFilter.blur(sigmaX: 8, sigmaY: 8),
+      onFinish: () {
+        print("finish");
+      },
+      onClickTarget: (target) {
+        print('onClickTarget: $target');
+      },
+      onClickTargetWithTapPosition: (target, tapDetails) {
+        print("target: $target");
+        print(
+            "clicked at position local: ${tapDetails.localPosition} - global: ${tapDetails.globalPosition}");
+      },
+      onClickOverlay: (target) {
+        print('onClickOverlay: $target');
+      },
+      onSkip: () {
+        print("skip");
+        return true;
+      },
+    );
+  }
+
+  List<TargetFocus> _createTargets() {
+    List<TargetFocus> targets = [];
+    targets.add(
+      TargetFocus(
+        identify: "keyBottomNavigation1",
+        keyTarget: _filterDropdownKey,
+        alignSkip: Alignment.topRight,
+        enableOverlayTab: true,
+        contents: [
+          TargetContent(
+            align: ContentAlign.top,
+            builder: (context, controller) {
+              return const Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: <Widget>[
+                  Text(
+                    "Titulo lorem ipsum",
+                    style: TextStyle(
+                      color: Colors.white,
+                    ),
+                  ),
+                ],
+              );
+            },
+          ),
+        ],
+      ),
+    );
+
+    targets.add(
+      TargetFocus(
+        identify: "keyBottomNavigation2",
+        keyTarget: _sortDropdownKey,
+        alignSkip: Alignment.topRight,
+        contents: [
+          TargetContent(
+            align: ContentAlign.top,
+            builder: (context, controller) {
+              return const Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: <Widget>[
+                  Text(
+                    "Titulo lorem ipsum",
+                    style: TextStyle(
+                      color: Colors.white,
+                    ),
+                  ),
+                ],
+              );
+            },
+          ),
+        ],
+      ),
+    );
+
+    targets.add(
+      TargetFocus(
+        identify: "keyBottomNavigation3",
+        keyTarget: _taskListKey,
+        alignSkip: Alignment.topRight,
+        contents: [
+          TargetContent(
+            align: ContentAlign.top,
+            builder: (context, controller) {
+              return Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: <Widget>[
+                  const Text(
+                    "Titulo lorem ipsum",
+                    style: TextStyle(
+                      color: Colors.white,
+                    ),
+                  ),
+                  const SizedBox(
+                    height: 10,
+                  ),
+                  ElevatedButton(
+                    onPressed: () {
+                      tutorialCoachMark.goTo(0);
+                    },
+                    child: const Text('Go to index 0'),
+                  ),
+                ],
+              );
+            },
+          ),
+        ],
+      ),
+    );
+    targets.add(
+      TargetFocus(
+        identify: "Target 0",
+        keyTarget: _addButtonKey,
+        contents: [
+          TargetContent(
+            align: ContentAlign.bottom,
+            builder: (context, controller) {
+              return const Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: <Widget>[
+                  Text(
+                    "Titulo lorem ipsum",
+                    style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
+                        fontSize: 20.0),
+                  ),
+                  Padding(
+                    padding: EdgeInsets.only(top: 10.0),
+                    child: Text(
+                      "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Proin pulvinar tortor eget maximus iaculis.",
+                      style: TextStyle(color: Colors.white),
+                    ),
+                  ),
+                ],
+              );
+            },
+          ),
+        ],
+      ),
+    );
+
+    return targets;
   }
 }

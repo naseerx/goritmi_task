@@ -32,7 +32,9 @@ class DBServices {
         title TEXT NOT NULL,
         description TEXT NOT NULL,
         done INTEGER NOT NULL,
-        createDate TEXT NOT NULL
+        createDate TEXT NOT NULL,
+        dueDateTime INTEGER NOT NULL
+
       )
       ''',
     );

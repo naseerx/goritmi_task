@@ -50,6 +50,9 @@ class CustomTextField extends StatelessWidget {
       ),
       child: Center(
         child: TextField(
+          onTapOutside: (e){
+            FocusManager.instance.primaryFocus?.unfocus();
+          },
           readOnly: readOnly,
           controller: controller,
           obscureText: obscure,

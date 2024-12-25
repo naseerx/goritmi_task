@@ -3,6 +3,7 @@ import 'package:goritmi_task/core/providers/task_provider.dart';
 import 'package:goritmi_task/ui/widgets/custom_buttons.dart';
 import 'package:goritmi_task/ui/widgets/custom_snackbars.dart';
 import 'package:goritmi_task/ui/widgets/custom_textfield.dart';
+import 'package:intl/intl.dart';
 
 import 'package:provider/provider.dart';
 
@@ -57,6 +58,52 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
                   controller: descriptionController,
                   hintText: 'Description...',
                 ),
+                const SizedBox(height: 10.0),
+                CustomTextField(
+                  readOnly: true,
+                  prefixIcon: const Icon(
+                    Icons.calendar_today,
+                    color: kPrimaryColor,
+                  ),
+                  controller: TextEditingController(
+                    text: taskProvider.selectedDueDate != null
+                        ? DateFormat('yyyy-MM-dd HH:mm')
+                            .format(taskProvider.selectedDueDate!)
+                        : 'Select Due Date & Time',
+                  ),
+                  hintText: 'Due Date & Time',
+                  onTap: () async {
+                    final selectedDate = await showDatePicker(
+                      context: context,
+                      initialDate:
+                          taskProvider.selectedDueDate ?? DateTime.now(),
+                      firstDate: DateTime.now(),
+                      lastDate: DateTime(2100),
+                    );
+
+                    if (selectedDate != null) {
+                      final selectedTime = await showTimePicker(
+                        context: context,
+                        initialTime: TimeOfDay.fromDateTime(
+                            taskProvider.selectedDueDate ?? DateTime.now()),
+                      );
+
+                      if (selectedTime != null) {
+                        final DateTime fullDateTime = DateTime(
+                          selectedDate.year,
+                          selectedDate.month,
+                          selectedDate.day,
+                          selectedTime.hour,
+                          selectedTime.minute,
+                        );
+
+                        taskProvider.selectedDueDate = fullDateTime;
+
+                        taskProvider.notifyListeners();
+                      }
+                    }
+                  },
+                ),
                 const SizedBox(height: 40.0),
                 CustomButton(
                     name: 'Add Task',
@@ -66,8 +113,11 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
                         return CustomSnackBar.showError(
                             'Please provide task details');
                       }
-                      taskProvider.addTask(titleController.text,
-                          descriptionController.text, context);
+                      taskProvider.addTask(
+                          titleController.text,
+                          descriptionController.text,
+                          context,
+                          taskProvider.selectedDueDate);
                     }),
               ],
             ),

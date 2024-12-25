@@ -26,7 +26,7 @@ class TaskCard extends StatelessWidget {
           borderRadius: BorderRadius.circular(15), // Set the border radius
         ),
         child: Padding(
-          padding: const EdgeInsets.all(15.0),
+          padding: const EdgeInsets.all(10),
           child: Row(
             children: [
               SizedBox(
@@ -64,23 +64,6 @@ class TaskCard extends StatelessWidget {
                   color: kSecondaryColor,
                 ),
               ),
-              // Column(
-              //   children: [
-              //     IconButton(
-              //       color: kPrimaryColor,
-              //       onPressed: onDone,
-              //       icon: Icon(done == 1
-              //           ? Icons.check_box
-              //           : Icons.check_box_outline_blank),
-              //     ),
-              //     IconButton(
-              //         onPressed: onDelete,
-              //         icon: const Icon(
-              //           Icons.delete,
-              //           color: Colors.red,
-              //         )),
-              //   ],
-              // ),
             ],
           ),
         ));

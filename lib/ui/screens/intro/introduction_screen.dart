@@ -20,6 +20,7 @@ class _IntroductionScreenState extends State<IntroductionScreen> {
       child: Consumer<IntroductionScreenVm>(
         builder: (context, vm, child) {
           return Scaffold(
+            backgroundColor: kSecondaryColor,
             body: Stack(
               children: [
                 Container(
