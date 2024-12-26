@@ -32,18 +32,6 @@ Make sure you have the following installed on your system:
 
 ### Configuration
 
-#### Email Configuration
-
-To configure email notifications, follow these steps:
-
-1. Navigate to the `lib/core/providers/notification_service.dart` file.
-2. Update the email configuration section with your SMTP details.
-
-Make sure the configuration matches your email provider's requirements. For example:
-```dart
-final smtpServer = gmail('your-email@gmail.com', 'your-password');
-```
-
 ### Features
 
 - Add, delete, and update tasks
@@ -65,15 +53,6 @@ To generate the APK:
    ```
 2. The APK will be available at `build/app/outputs/flutter-apk/app-release.apk`.
 
-## Task Submission Guidelines
-
-1. Upload the completed task to a GitHub repository.
-2. Send the APK along with the repository link via email to `info@goritmi.co.uk`.
-3. Include the following in your submission:
-    - Instructions for setting up the project
-    - Email configuration requirements
-
-**Note**: Late submissions will not be accepted. For any queries, feel free to contact us before the deadline.
 
 ## Resources
 
