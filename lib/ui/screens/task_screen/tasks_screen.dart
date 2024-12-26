@@ -8,6 +8,7 @@ import 'package:goritmi_task/core/providers/task_provider.dart';
 import 'package:goritmi_task/ui/widgets/custom_snackbars.dart';
 import 'package:goritmi_task/ui/widgets/task_block.dart';
 import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../core/constants/colors.dart';
 import 'package:permission_handler/permission_handler.dart';
@@ -28,6 +29,7 @@ class _TasksScreenState extends State<TasksScreen> {
   final GlobalKey _addButtonKey = GlobalKey();
 
   late TutorialCoachMark tutorialCoachMark;
+  bool _tutorialShown = false;
 
   Future<void> requestNotificationPermissions() async {
     var status = await Permission.notification.request();
@@ -41,13 +43,24 @@ class _TasksScreenState extends State<TasksScreen> {
     }
   }
 
+  Future<void> checkTutorialStatus() async {
+    final prefs = await SharedPreferences.getInstance();
+    _tutorialShown = prefs.getBool('tutorialShown') ?? false;
+
+    if (!_tutorialShown) {
+      createTutorial();
+      Future.delayed(Duration.zero, showTutorial);
+
+      // Mark tutorial as shown
+      await prefs.setBool('tutorialShown', true);
+    }
+  }
+
   @override
   void initState() {
-    requestNotificationPermissions();
-    createTutorial();
-    Future.delayed(Duration.zero, showTutorial);
-
     super.initState();
+    requestNotificationPermissions();
+    checkTutorialStatus();
   }
 
   @override
@@ -129,9 +142,7 @@ class _TasksScreenState extends State<TasksScreen> {
                       String optionText = '';
                       if (option == TaskSortOption.none) {
                         optionText = 'None';
-                      } else if (option == TaskSortOption.creationDate) {
-                        optionText = 'Create Date';
-                      } else if (option == TaskSortOption.titleAscending) {
+                      }else if (option == TaskSortOption.titleAscending) {
                         optionText = 'Title (A-Z)';
                       } else if (option == TaskSortOption.titleDescending) {
                         optionText = 'Title (Z-A)';
@@ -252,9 +263,10 @@ class _TasksScreenState extends State<TasksScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: <Widget>[
                   Text(
-                    "Titulo lorem ipsum",
+                    "Use this dropdown to filter tasks based on their status. You can view all tasks, only completed tasks, or pending tasks.",
                     style: TextStyle(
-                      color: Colors.white,
+                      color: kBlack,
+                      fontSize: 16,
                     ),
                   ),
                 ],
@@ -279,11 +291,13 @@ class _TasksScreenState extends State<TasksScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: <Widget>[
                   Text(
-                    "Titulo lorem ipsum",
+                    "Use this dropdown to sort tasks. You can sort by creation date, or organize tasks alphabetically (A-Z or Z-A).",
                     style: TextStyle(
                       color: Colors.white,
+                      fontSize: 16,
                     ),
                   ),
+
                 ],
               );
             },
@@ -306,11 +320,13 @@ class _TasksScreenState extends State<TasksScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: <Widget>[
                   const Text(
-                    "Titulo lorem ipsum",
+                    "This is your task list. When you add tasks, they will appear here. Swipe left on a task to delete it.",
                     style: TextStyle(
                       color: Colors.white,
+                      fontSize: 16,
                     ),
                   ),
+
                   const SizedBox(
                     height: 10,
                   ),
@@ -340,7 +356,7 @@ class _TasksScreenState extends State<TasksScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: <Widget>[
                   Text(
-                    "Titulo lorem ipsum",
+                    "Add New Tasks",
                     style: TextStyle(
                         fontWeight: FontWeight.bold,
                         color: Colors.white,
@@ -349,7 +365,7 @@ class _TasksScreenState extends State<TasksScreen> {
                   Padding(
                     padding: EdgeInsets.only(top: 10.0),
                     child: Text(
-                      "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Proin pulvinar tortor eget maximus iaculis.",
+                      "Tap this button to create a new task. You can add a title, description, and other details to organize your tasks.",
                       style: TextStyle(color: Colors.white),
                     ),
                   ),

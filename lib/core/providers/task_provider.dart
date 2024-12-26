@@ -125,9 +125,7 @@ class TaskProvider extends ChangeNotifier {
         default:
       }
 
-      if (currentOption == TaskSortOption.creationDate) {
-        tasks.sort((a, b) => a.createDate.compareTo(b.createDate));
-      } else if (currentOption == TaskSortOption.titleAscending) {
+      if (currentOption == TaskSortOption.titleAscending) {
         tasks.sort((a, b) => a.title.compareTo(b.title)); // Ascending
       } else if (currentOption == TaskSortOption.titleDescending) {
         tasks.sort((a, b) => b.title.compareTo(a.title)); // Descending
